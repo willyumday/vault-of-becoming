@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mirror Room | Vault of Becoming</title>
+    <style>
+        :root {
+            --background: #0f0f13;
+            --text: #e6e6e8;
+            --accent: #9079e0;
+            --secondary: #45445a;
+            --highlight: #f5a742;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            font-style: italic;
+        }
+        
+        .mirror-container {
+            position: relative;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            background-color: rgba(15, 15, 19, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .mirror-container:hover {
+            box-shadow: 0 0 20px rgba(144, 121, 224, 0.3);
+        }
+        
+        .reflection {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 3px solid var(--accent);
+            font-style: italic;
+            background-color: rgba(69, 68, 90, 0.2);
+        }
+        
+        .prompt {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--highlight);
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            background-color: rgba(230, 230, 232, 0.1);
+            border: 1px solid var(--secondary);
+            border-radius: 4px;
+            padding: 15px;
+            color: var(--text);
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(144, 121, 224, 0.5);
+        }
+        
+        button {
+            background-color: var(--accent);
+            color: var(--background);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #7c64d1;
+            transform: translateY(-2px);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .nav-button {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(144, 121, 224, 0.2);
+        }
+        
+        .reflection-container {
+            margin-top: 30px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .reflection-container.visible {
+            opacity: 1;
+        }
+        
+        .reflection-timestamp {
+            font-size: 0.8rem;
+            color: var(--secondary);
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .memory-bank {
+            margin-top: 50px;
+            padding: 20px;
+            border: 1px dashed var(--secondary);
+            border-radius: 8px;
+        }
+        
+        .memory-title {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .memory-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(69, 68, 90, 0.2);
+            border-radius: 4px;
+        }
+        
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 3s infinite ease-in-out;
+        }
+        
+        .prompt-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .prompt-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .prompt-button {
+            background-color: transparent;
+            border: 1px solid var(--secondary);
+            color: var(--text);
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+        
+        .prompt-button:hover, .prompt-button.active {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>The Mirror Room</h1>
+            <div class="subtitle">Reflections of who you are becoming</div>
+        </header>
+        
+        <div class="mirror-container">
+            <div class="prompt-selector">
+                <button class="prompt-button" onclick="changePrompt(0)">Deep</button>
+                <button class="prompt-button" onclick="changePrompt(1)">Playful</button>
+                <button class="prompt-button" onclick="changePrompt(2)">Uncertain</button>
+                <button class="prompt-button" onclick="changePrompt(3)">Random</button>
+            </div>
+            
+            <div class="prompt-container">
+                <div class="prompt" id="current-prompt">What version of myself am I still becoming?</div>
+            </div>
+            
+            <textarea id="reflection-input" placeholder="Begin writing your reflection here..."></textarea>
+            
+            <div style="display: flex; justify-content: space-between;">
+                <button onclick="saveReflection()">Save to Memory Bank</button>
+                <button onclick="generateCounterpoint()">Generate Counterpoint</button>
+            </div>
+            
+            <div class="reflection-container" id="counterpoint-container">
+                <div class="reflection" id="counterpoint">
+                    <!-- Counterpoint will appear here -->
+                </div>
+                <div class="reflection-timestamp" id="counterpoint-timestamp"></div>
+            </div>
+        </div>
+        
+        <div class="memory-bank">
+            <div class="memory-title">Memory Bank</div>
+            <div id="memory-entries">
+                <!-- Saved reflections will appear here -->
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="navigateToRoom('unfinished-wing')">← Unfinished Wing</button>
+            <button class="nav-button" onclick="navigateToRoom('time-capsule')">Time Capsule →</button>
+        </div>
+        
+        <div class="footer">
+            The Vault of Becoming | Your Expressive Legacy Capsule
+        </div>
+    </div>
+
+    <script>
+        // Array of prompts
+        const prompts = [
+            // Deep prompts
+            [
+                "What version of myself am I still becoming?",
+                "What would I tell myself ten years ago that I needed to hear?",
+                "What belief have I outgrown but haven't fully released?",
+                "What part of me is asking to be witnessed right now?",
+                "What truth am I avoiding that would set me free if I faced it?"
+            ],
+            // Playful prompts
+            [
+                "If my life had a soundtrack, what song is playing right now?",
+                "What ridiculous thing am I taking too seriously?",
+                "If my future self could send me a meme right now, what would it be?",
+                "What's the most unexpected plot twist I've experienced lately?",
+                "What's something I find hilarious that almost no one else gets?"
+            ],
+            // Uncertain prompts
+            [
+                "What question am I living in right now that has no clear answer?",
+                "Where do I feel most lost, and what tiny light might be guiding me?",
+                "What possibility scares and excites me in equal measure?",
+                "What am I in the middle of understanding?",
+                "What's unclear to me now that I sense might become clear later?"
+            ],
+            // Random personal prompts
+            [
+                "What's the most beautiful thing I've witnessed recently?",
+                "What unspoken thing needs to be said?",
+                "What am I collecting (tangible or intangible) without realizing it?",
+                "What feels like home to me that isn't a place?",
+                "What do I know in my body that my mind hasn't caught up to yet?"
+            ]
+        ];
+        
+        // Counterpoint responses
+        const counterpoints = [
+            "But what if the opposite is equally true? Perhaps...",
+            "There's another perspective worth considering: what if...",
+            "The shadow side of this reflection might reveal that...",
+            "A future version of you might challenge this by saying...",
+            "The counterpoint to this feeling might be that...",
+            "What if this belief is just a story you've been telling yourself?",
+            "Consider this: what if the exact opposite is what you truly need?",
+            "Your past self might disagree entirely, suggesting instead that..."
+        ];
+        
+        // Current prompt category
+        let currentCategory = 0;
+        
+        // Change prompt based on category
+        function changePrompt(category) {
+            currentCategory = category;
+            
+            // If random category, select random prompt from all categories
+            let selectedPrompt;
+            if (category === 3) {
+                const allPrompts = prompts.flat();
+                selectedPrompt = allPrompts[Math.floor(Math.random() * allPrompts.length)];
+            } else {
+                selectedPrompt = prompts[category][Math.floor(Math.random() * prompts[category].length)];
+            }
+            
+            document.getElementById('current-prompt').textContent = selectedPrompt;
+            
+            // Update active button
+            document.querySelectorAll('.prompt-button').forEach((button, index) => {
+                if (index === category) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+        
+        // Generate counterpoint
+        function generateCounterpoint() {
+            const reflectionText = document.getElementById('reflection-input').value;
+            
+            if (reflectionText.trim() === '') {
+                alert('Please write a reflection first.');
+                return;
+            }
+            
+            const counterpoint = counterpoints[Math.floor(Math.random() * counterpoints.length)];
+            const counterFragment = reflectionText.split(' ').slice(0, 5).join(' ');
+            
+            document.getElementById('counterpoint').innerHTML = counterpoint + " " + 
+                generateCounterpointContent(reflectionText);
+            
+            // Get current date/time
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            document.getElementById('counterpoint-timestamp').textContent = timestamp;
+            
+            // Show counterpoint container
+            document.getElementById('counterpoint-container').classList.add('visible');
+        }
+        
+        // Generate counterpoint content based on reflection
+        function generateCounterpointContent(reflection) {
+            // This is a simple algorithm that tries to generate an opposite perspective
+            // In a real implementation, this could be more sophisticated or use AI
+            
+            const lowerReflection = reflection.toLowerCase();
+            let counterContent = "";
+            
+            if (lowerReflection.includes("i am")) {
+                counterContent = "Maybe you aren't who you think you are yet. What if your identity is still forming?";
+            } else if (lowerReflection.includes("always") || lowerReflection.includes("never")) {
+                counterContent = "Is anything truly always or never? Perhaps the exceptions are where the truth lies.";
+            } else if (lowerReflection.includes("afraid") || lowerReflection.includes("fear")) {
+                counterContent = "What if this fear is actually pointing you toward what you most need to explore?";
+            } else if (lowerReflection.includes("love") || lowerReflection.includes("passion")) {
+                counterContent = "Sometimes what we love most can limit us. What would happen if you released this attachment?";
+            } else if (lowerReflection.includes("future") || lowerReflection.includes("plan")) {
+                counterContent = "The future is unwritten. What beauty might emerge from having no plan at all?";
+            } else if (lowerReflection.includes("past") || lowerReflection.includes("regret")) {
+                counterContent = "What if that past event was exactly what needed to happen for you to become who you are?";
+            } else {
+                // Default counterpoints that could work for many reflections
+                const defaultCounters = [
+                    "What if the answer isn't in thinking more, but in feeling more deeply?",
+                    "Perhaps the truth lies in the opposite direction of your current thoughts.",
+                    "What would happen if you questioned your most fundamental assumption here?",
+                    "Maybe this reflection reveals more about what you value than what is objectively true."
+                ];
+                counterContent = defaultCounters[Math.floor(Math.random() * defaultCounters.length)];
+            }
+            
+            return counterContent;
+        }
+        
+        // Save reflection to memory bank
+        function saveReflection() {
+            const reflectionText = document.getElementById('reflection-input').value;
+            const promptText = document.getElementById('current-prompt').textContent;
+            
+            if (reflectionText.trim() === '') {
+                alert('Please write a reflection before saving.');
+                return;
+            }
+            
+            // Get current date/time
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            
+            // Create new memory entry
+            const memoryEntry = document.createElement('div');
+            memoryEntry.className = 'memory-entry';
+            memoryEntry.innerHTML = `
+                <strong>${promptText}</strong>
+                <p>${reflectionText}</p>
+                <div class="reflection-timestamp">${timestamp}</div>
+            `;
+            
+            // Add to memory bank
+            document.getElementById('memory-entries').prepend(memoryEntry);
+            
+            // Clear input
+            document.getElementById('reflection-input').value = '';
+            
+            // Hide counterpoint if visible
+            document.getElementById('counterpoint-container').classList.remove('visible');
+            
+            // Save to localStorage (in a real implementation)
+            saveToLocalStorage();
+            
+            alert('Reflection saved to Memory Bank.');
+        }
+        
+        // Save to localStorage
+        function saveToLocalStorage() {
+            // In a real implementation, this would save the user's reflections
+            // For now, we'll just simulate this behavior
+            console.log('Saving reflection to local storage...');
+        }
+        
+        // Navigate to another room
+        function navigateToRoom(room) {
+            alert(`In a complete implementation, this would navigate to the ${room.replace('-', ' ')}.`);
+        }
+        
+        // Initialize with default prompt
+        document.addEventListener('DOMContentLoaded', function() {
+            changePrompt(0);
+            document.querySelector('.prompt-button').classList.add('active');
+        });
+    </script>
+</body>
+</html>
